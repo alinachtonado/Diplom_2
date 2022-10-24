@@ -1,3 +1,5 @@
+import org.json.JSONObject;
+import org.junit.After;
 import org.junit.Before;
 import io.restassured.RestAssured;
 import org.junit.Test;
@@ -62,6 +64,30 @@ public class LoginUser {
                 .then().assertThat().body("accessToken", nullValue())
                 .and().body("refreshToken", nullValue())
                 .statusCode(401);
+    }
+
+    @After
+    public void cleanUser() {
+        if (login == null) {
+            return;
+        }
+        String json = String.format("{\"email\": \"%s\",\"password\":\"password\"}", login);
+        var response = given()
+                .header("Content-type", "application/json")
+                .body(json)
+                .when()
+                .post("/api/auth/login");
+        response.then().assertThat().statusCode(200);
+        JSONObject jsonObject = new JSONObject(response.getBody().asString());
+        String accessTokenToDelete = jsonObject.get("accessToken").toString();
+
+        given()
+                .header("Content-type", "application/json")
+                .header("Authorization", accessTokenToDelete)
+                .when()
+                .delete("/api/auth/user")
+                .then()
+                .statusCode(202);
     }
 }
 

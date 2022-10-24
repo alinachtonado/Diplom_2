@@ -1,17 +1,12 @@
 import io.restassured.RestAssured;
 import org.json.JSONObject;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 
-import java.io.File;
-
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
-public class EditUserData {
+public class GetOrders {
     private String login;
     private String accessToken;
 
@@ -50,8 +45,8 @@ public class EditUserData {
     }
 
     @Test
-    @DisplayName("Edit user name data")
-    public void editUserNameData(){
+    @DisplayName("Get order list")
+    public void getOrderList() {
         String json = String.format("{\"email\":\"%s\",\"name\":\"Username2\"}", login);
         given()
                 .header("Content-type", "application/json")
@@ -59,65 +54,25 @@ public class EditUserData {
                 .and()
                 .body(json)
                 .when()
-                .patch("/api/auth/user ")
+                .get("/api/orders")
                 .then().assertThat()
                 .and()
                 .statusCode(200);
     }
 
     @Test
-    @DisplayName("Edit user email data")
-    public void editUserEmailData(){
-        login = String.format("a%s@gmail.com", java.util.UUID.randomUUID());
-        String json = String.format("{\"email\":\"%s\",\"name\":\"Username\"}", login);
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessToken)
-                .and()
-                .body(json)
-                .when()
-                .patch("/api/auth/user ")
-                .then().assertThat()
-                .and()
-                .statusCode(200);
-    }
-
-    @Test
-    @DisplayName("Edit unauthorized user data")
-    public void editUserDataNotAuth(){
+    @DisplayName("Get order list unauthorized user")
+    public void getOrderListUnauth() {
         String json = String.format("{\"email\":\"%s\",\"name\":\"Username2\"}", login);
         given()
                 .header("Content-type", "application/json")
                 .and()
                 .body(json)
                 .when()
-                .patch("/api/auth/user ")
-                .then().assertThat().body("message", equalTo("You should be authorised"))
+                .get("/api/orders")
+                .then().assertThat()
                 .and()
                 .statusCode(401);
     }
-
-    @After
-    public void cleanUser() {
-        if (login == null) {
-            return;
-        }
-        String json = String.format("{\"email\": \"%s\",\"password\":\"password\"}", login);
-        var response = given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/auth/login");
-        response.then().assertThat().statusCode(200);
-        JSONObject jsonObject = new JSONObject(response.getBody().asString());
-        String accessTokenToDelete = jsonObject.get("accessToken").toString();
-
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessTokenToDelete)
-                .when()
-                .delete("/api/auth/user")
-                .then()
-                .statusCode(202);
-    }
 }
+
