@@ -7,7 +7,7 @@ import org.junit.jupiter.api.DisplayName;
 
 import static io.restassured.RestAssured.given;
 
-public class GetOrders {
+public class GetOrdersTest {
     private String login;
     private String accessToken;
 

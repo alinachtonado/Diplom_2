@@ -5,13 +5,9 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.DisplayName;
 
-import java.io.File;
-
 import static io.restassured.RestAssured.given;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.Matchers.notNullValue;
 
-public class EditUserData {
+public class CreateOrderTest {
     private String login;
     private String accessToken;
 
@@ -50,51 +46,66 @@ public class EditUserData {
     }
 
     @Test
-    @DisplayName("Edit user name data")
-    public void editUserNameData(){
-        String json = String.format("{\"email\":\"%s\",\"name\":\"Username2\"}", login);
+    @DisplayName("Auth user create order")
+    public void userCreateOrder() {
+        String json = String.format("{\"ingredients\": [\"61c0c5a71d1f82001bdaaa6d\",\"61c0c5a71d1f82001bdaaa6f\"]}");
         given()
                 .header("Content-type", "application/json")
                 .header("Authorization", accessToken)
                 .and()
                 .body(json)
                 .when()
-                .patch("/api/auth/user ")
+                .post("/api/orders")
                 .then().assertThat()
                 .and()
                 .statusCode(200);
     }
 
     @Test
-    @DisplayName("Edit user email data")
-    public void editUserEmailData(){
-        login = String.format("a%s@gmail.com", java.util.UUID.randomUUID());
-        String json = String.format("{\"email\":\"%s\",\"name\":\"Username\"}", login);
+    @DisplayName("Unauthorized user create order")
+    public void unauthUserCreateOrder() {
+        String json = String.format("{\"ingredients\": [\"61c0c5a71d1f82001bdaaa6d\",\"61c0c5a71d1f82001bdaaa6f\"]}");
+        given()
+                .header("Content-type", "application/json")
+                .and()
+                .body(json)
+                .when()
+                .post("/api/orders")
+                .then().assertThat()
+                .and()
+                .statusCode(200);
+    }
+
+    @Test
+    @DisplayName("User create order without ingredients")
+    public void userCreateOrderWithoutIngredients() {
+        String json = String.format("{\"ingredients\": []}");
         given()
                 .header("Content-type", "application/json")
                 .header("Authorization", accessToken)
                 .and()
                 .body(json)
                 .when()
-                .patch("/api/auth/user ")
+                .post("/api/orders")
                 .then().assertThat()
                 .and()
-                .statusCode(200);
+                .statusCode(400);
     }
 
     @Test
-    @DisplayName("Edit unauthorized user data")
-    public void editUserDataNotAuth(){
-        String json = String.format("{\"email\":\"%s\",\"name\":\"Username2\"}", login);
+    @DisplayName("User create order with invalid ingredients hash")
+    public void userCreateOrderWithInvalidHash() {
+        String json = String.format("{\"ingredients\": [\"61c0c5a71d1f82001bdaa+++\",\"61c0c5a71d1f82001bdaa___\"]}");
         given()
                 .header("Content-type", "application/json")
+                .header("Authorization", accessToken)
                 .and()
                 .body(json)
                 .when()
-                .patch("/api/auth/user ")
-                .then().assertThat().body("message", equalTo("You should be authorised"))
+                .post("/api/orders")
+                .then().assertThat()
                 .and()
-                .statusCode(401);
+                .statusCode(500);
     }
 
     @After
