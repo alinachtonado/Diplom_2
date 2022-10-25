@@ -1,3 +1,4 @@
+import io.qameta.allure.junit4.DisplayName;
 import io.restassured.path.json.JsonPath;
 import io.restassured.response.Response;
 import io.restassured.specification.RequestSpecification;
@@ -6,7 +7,6 @@ import org.junit.After;
 import org.junit.Before;
 import io.restassured.RestAssured;
 import org.junit.Test;
-import org.junit.jupiter.api.DisplayName;
 
 import java.io.File;
 
