@@ -6,91 +6,59 @@ import org.junit.Before;
 import org.junit.Test;
 
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static io.restassured.RestAssured.given;
 import static org.hamcrest.Matchers.equalTo;
 import static org.hamcrest.Matchers.notNullValue;
 
 public class EditUserDataTest {
-    private String login;
+    private User user;
     private String accessToken;
 
     @Before
     public void setUp() {
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
-        String json = getRandomUserJson();
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/auth/register")
+        user = User.createRandomUser();
+        UserOperations.createUser(user)
                 .then().assertThat()
-                .and()
                 .statusCode(200);
-        userLogIn();
-    }
-
-    private String getRandomUserJson() {
-        login = String.format("a%s@gmail.com", java.util.UUID.randomUUID());
-        String json = String.format("{\"email\": \"%s\"," +
-                "  \"password\": \"password\", \"name\": \"Username\"}", login);
-        return json;
-    }
-
-    private void userLogIn() {
-        String json = String.format("{\"email\": \"%s\",\"password\":\"password\"}", login);
-        var response = given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/auth/login");
-        response.then().assertThat().statusCode(200);
-        JSONObject jsonObject = new JSONObject(response.getBody().asString());
-        accessToken = jsonObject.get("accessToken").toString();
+        accessToken = UserOperations.loginUserAndGetAccessToken(user);
     }
 
     @Test
     @DisplayName("Edit user name data")
     public void editUserNameData(){
-        String json = String.format("{\"email\":\"%s\",\"name\":\"Username2\"}", login);
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessToken)
-                .and()
-                .body(json)
-                .when()
-                .patch("/api/auth/user ")
+        Map<String, String> body = new HashMap<String, String>();
+        body.put("name", "Username2");
+        UserOperations.editUser(body, accessToken)
                 .then().assertThat()
-                .and()
                 .statusCode(200);
     }
 
     @Test
     @DisplayName("Edit user email data")
     public void editUserEmailData(){
-        login = String.format("a%s@gmail.com", java.util.UUID.randomUUID());
-        String json = String.format("{\"email\":\"%s\",\"name\":\"Username\"}", login);
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessToken)
-                .and()
-                .body(json)
-                .when()
-                .patch("/api/auth/user ")
+        Map<String, String> body = new HashMap<String, String>();
+        String newEmail = String.format("a%s@gmail.com", java.util.UUID.randomUUID());
+        body.put("email", newEmail);
+        UserOperations.editUser(body, accessToken)
                 .then().assertThat()
-                .and()
                 .statusCode(200);
     }
 
     @Test
     @DisplayName("Edit unauthorized user data")
     public void editUserDataNotAuth(){
-        String json = String.format("{\"email\":\"%s\",\"name\":\"Username2\"}", login);
+        Map<String, String> body = new HashMap<String, String>();
+        body.put("name", "Username2");
         given()
                 .header("Content-type", "application/json")
                 .and()
-                .body(json)
+                .body(body)
                 .when()
-                .patch("/api/auth/user ")
+                .patch("/api/auth/user")
                 .then().assertThat().body("message", equalTo("You should be authorised"))
                 .and()
                 .statusCode(401);
@@ -98,25 +66,6 @@ public class EditUserDataTest {
 
     @After
     public void cleanUser() {
-        if (login == null) {
-            return;
-        }
-        String json = String.format("{\"email\": \"%s\",\"password\":\"password\"}", login);
-        var response = given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/auth/login");
-        response.then().assertThat().statusCode(200);
-        JSONObject jsonObject = new JSONObject(response.getBody().asString());
-        String accessTokenToDelete = jsonObject.get("accessToken").toString();
-
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessTokenToDelete)
-                .when()
-                .delete("/api/auth/user")
-                .then()
-                .statusCode(202);
+        UserOperations.deleteUserByToken(accessToken);
     }
 }

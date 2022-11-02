@@ -5,130 +5,91 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import static io.restassured.RestAssured.given;
 
 public class CreateOrderTest {
-    private String login;
+    private User user;
     private String accessToken;
 
     @Before
     public void setUp() {
         RestAssured.baseURI = "https://stellarburgers.nomoreparties.site";
-        String json = getRandomUserJson();
-        given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/auth/register")
+        user = User.createRandomUser();
+        UserOperations.createUser(user)
                 .then().assertThat()
-                .and()
                 .statusCode(200);
-        userLogIn();
+        accessToken = UserOperations.loginUserAndGetAccessToken(user);
     }
 
-    private String getRandomUserJson() {
-        login = String.format("a%s@gmail.com", java.util.UUID.randomUUID());
-        String json = String.format("{\"email\": \"%s\"," +
-                "  \"password\": \"password\", \"name\": \"Username\"}", login);
-        return json;
-    }
-
-    private void userLogIn() {
-        String json = String.format("{\"email\": \"%s\",\"password\":\"password\"}", login);
-        var response = given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/auth/login");
-        response.then().assertThat().statusCode(200);
-        JSONObject jsonObject = new JSONObject(response.getBody().asString());
-        accessToken = jsonObject.get("accessToken").toString();
-    }
 
     @Test
     @DisplayName("Auth user create order")
     public void userCreateOrder() {
-        String json = String.format("{\"ingredients\": [\"61c0c5a71d1f82001bdaaa6d\",\"61c0c5a71d1f82001bdaaa6f\"]}");
+        Map<String, String[]> body = new HashMap<String, String[]>();
+        body.put("ingredients", new String[] { "61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f"});
         given()
                 .header("Content-type", "application/json")
                 .header("Authorization", accessToken)
                 .and()
-                .body(json)
+                .body(body)
                 .when()
                 .post("/api/orders")
                 .then().assertThat()
-                .and()
                 .statusCode(200);
     }
 
     @Test
     @DisplayName("Unauthorized user create order")
     public void unauthUserCreateOrder() {
-        String json = String.format("{\"ingredients\": [\"61c0c5a71d1f82001bdaaa6d\",\"61c0c5a71d1f82001bdaaa6f\"]}");
+        Map<String, String[]> body = new HashMap<String, String[]>();
+        body.put("ingredients", new String[] { "61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f"});
         given()
                 .header("Content-type", "application/json")
                 .and()
-                .body(json)
+                .body(body)
                 .when()
                 .post("/api/orders")
                 .then().assertThat()
-                .and()
                 .statusCode(200);
     }
 
     @Test
     @DisplayName("User create order without ingredients")
     public void userCreateOrderWithoutIngredients() {
-        String json = String.format("{\"ingredients\": []}");
+        Map<String, String[]> body = new HashMap<String, String[]>();
+        body.put("ingredients", new String[0]);
         given()
                 .header("Content-type", "application/json")
                 .header("Authorization", accessToken)
                 .and()
-                .body(json)
+                .body(body)
                 .when()
                 .post("/api/orders")
                 .then().assertThat()
-                .and()
                 .statusCode(400);
     }
 
     @Test
     @DisplayName("User create order with invalid ingredients hash")
     public void userCreateOrderWithInvalidHash() {
-        String json = String.format("{\"ingredients\": [\"61c0c5a71d1f82001bdaa+++\",\"61c0c5a71d1f82001bdaa___\"]}");
+        Map<String, String[]> body = new HashMap<String, String[]>();
+        body.put("ingredients", new String[] { "61c0c5a71d1f82001bdaa+++", "61c0c5a71d1f82001bdaa___"});
         given()
                 .header("Content-type", "application/json")
                 .header("Authorization", accessToken)
                 .and()
-                .body(json)
+                .body(body)
                 .when()
                 .post("/api/orders")
                 .then().assertThat()
-                .and()
                 .statusCode(500);
     }
 
     @After
     public void cleanUser() {
-        if (login == null) {
-            return;
-        }
-        String json = String.format("{\"email\": \"%s\",\"password\":\"password\"}", login);
-        var response = given()
-                .header("Content-type", "application/json")
-                .body(json)
-                .when()
-                .post("/api/auth/login");
-        response.then().assertThat().statusCode(200);
-        JSONObject jsonObject = new JSONObject(response.getBody().asString());
-        String accessTokenToDelete = jsonObject.get("accessToken").toString();
-
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessTokenToDelete)
-                .when()
-                .delete("/api/auth/user")
-                .then()
-                .statusCode(202);
+        UserOperations.deleteUserByToken(accessToken);
     }
 }
