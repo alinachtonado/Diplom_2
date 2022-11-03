@@ -93,4 +93,19 @@ public class UserOperations{
                 .when()
                 .post("/api/orders");
     }
+
+    public static Response getOrders(String accessToken){
+        return given()
+                .header("Content-type", "application/json")
+                .header("Authorization", accessToken)
+                .when()
+                .get("/api/orders");
+    }
+
+    public static Response getOrders(){
+        return given()
+                .header("Content-type", "application/json")
+                .when()
+                .get("/api/orders");
+    }
 }

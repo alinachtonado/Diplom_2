@@ -53,12 +53,7 @@ public class EditUserDataTest {
     public void editUserDataNotAuth(){
         Map<String, String> body = new HashMap<String, String>();
         body.put("name", "Username2");
-        given()
-                .header("Content-type", "application/json")
-                .and()
-                .body(body)
-                .when()
-                .patch("/api/auth/user")
+        UserOperations.editUser(body)
                 .then().assertThat().body("message", equalTo("You should be authorised"))
                 .and()
                 .statusCode(401);

@@ -24,11 +24,7 @@ public class GetOrdersTest {
     @Test
     @DisplayName("Get order list")
     public void getOrderList() {
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessToken)
-                .when()
-                .get("/api/orders")
+        UserOperations.getOrders(accessToken)
                 .then().assertThat()
                 .statusCode(200);
     }
@@ -36,10 +32,7 @@ public class GetOrdersTest {
     @Test
     @DisplayName("Get order list unauthorized user")
     public void getOrderListUnauth() {
-        given()
-                .header("Content-type", "application/json")
-                .when()
-                .get("/api/orders")
+        UserOperations.getOrders()
                 .then().assertThat()
                 .statusCode(401);
     }
