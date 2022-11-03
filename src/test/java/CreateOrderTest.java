@@ -28,15 +28,8 @@ public class CreateOrderTest {
     @Test
     @DisplayName("Auth user create order")
     public void userCreateOrder() {
-        Map<String, String[]> body = new HashMap<String, String[]>();
-        body.put("ingredients", new String[] { "61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f"});
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessToken)
-                .and()
-                .body(body)
-                .when()
-                .post("/api/orders")
+        String[] ingridients = new String[] { "61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f"};
+        UserOperations.createOrder(ingridients, accessToken)
                 .then().assertThat()
                 .statusCode(200);
     }
@@ -44,14 +37,8 @@ public class CreateOrderTest {
     @Test
     @DisplayName("Unauthorized user create order")
     public void unauthUserCreateOrder() {
-        Map<String, String[]> body = new HashMap<String, String[]>();
-        body.put("ingredients", new String[] { "61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f"});
-        given()
-                .header("Content-type", "application/json")
-                .and()
-                .body(body)
-                .when()
-                .post("/api/orders")
+        String[] ingridients = new String[] { "61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f"};
+        UserOperations.createOrder(ingridients)
                 .then().assertThat()
                 .statusCode(200);
     }
@@ -59,15 +46,8 @@ public class CreateOrderTest {
     @Test
     @DisplayName("User create order without ingredients")
     public void userCreateOrderWithoutIngredients() {
-        Map<String, String[]> body = new HashMap<String, String[]>();
-        body.put("ingredients", new String[0]);
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessToken)
-                .and()
-                .body(body)
-                .when()
-                .post("/api/orders")
+        String[] ingridients = new String[0];
+        UserOperations.createOrder(ingridients, accessToken)
                 .then().assertThat()
                 .statusCode(400);
     }
@@ -75,15 +55,8 @@ public class CreateOrderTest {
     @Test
     @DisplayName("User create order with invalid ingredients hash")
     public void userCreateOrderWithInvalidHash() {
-        Map<String, String[]> body = new HashMap<String, String[]>();
-        body.put("ingredients", new String[] { "61c0c5a71d1f82001bdaa+++", "61c0c5a71d1f82001bdaa___"});
-        given()
-                .header("Content-type", "application/json")
-                .header("Authorization", accessToken)
-                .and()
-                .body(body)
-                .when()
-                .post("/api/orders")
+        String[] ingridients = new String[] { "61c0c5a71d1f82001bdaa+++", "61c0c5a71d1f82001bdaa___"};
+        UserOperations.createOrder(ingridients)
                 .then().assertThat()
                 .statusCode(500);
     }

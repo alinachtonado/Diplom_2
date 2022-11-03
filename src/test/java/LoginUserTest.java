@@ -48,6 +48,5 @@ public class LoginUserTest {
     @After
     public void cleanUser() {
         UserOperations.deleteUser(user);
-        user = null;
     }
 }

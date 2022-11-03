@@ -48,12 +48,10 @@ public class CreateUserTest {
         user = new User(login, "", "Username");
         UserOperations.createUser(user)
                 .then().assertThat().statusCode(403);
-        user = null;
     }
 
     @After
     public void cleanUser() {
         UserOperations.deleteUser(user);
-        user = null;
     }
 }
