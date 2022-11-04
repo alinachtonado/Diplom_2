@@ -29,7 +29,7 @@ public class CreateOrderTest {
     @DisplayName("Auth user create order")
     public void userCreateOrder() {
         String[] ingridients = new String[] { "61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f"};
-        UserOperations.createOrder(ingridients, accessToken)
+        OrderOperations.createOrder(ingridients, accessToken)
                 .then().assertThat()
                 .statusCode(200);
     }
@@ -38,7 +38,7 @@ public class CreateOrderTest {
     @DisplayName("Unauthorized user create order")
     public void unauthUserCreateOrder() {
         String[] ingridients = new String[] { "61c0c5a71d1f82001bdaaa6d", "61c0c5a71d1f82001bdaaa6f"};
-        UserOperations.createOrder(ingridients)
+        OrderOperations.createOrder(ingridients)
                 .then().assertThat()
                 .statusCode(200);
     }
@@ -47,7 +47,7 @@ public class CreateOrderTest {
     @DisplayName("User create order without ingredients")
     public void userCreateOrderWithoutIngredients() {
         String[] ingridients = new String[0];
-        UserOperations.createOrder(ingridients, accessToken)
+        OrderOperations.createOrder(ingridients, accessToken)
                 .then().assertThat()
                 .statusCode(400);
     }
@@ -56,7 +56,7 @@ public class CreateOrderTest {
     @DisplayName("User create order with invalid ingredients hash")
     public void userCreateOrderWithInvalidHash() {
         String[] ingridients = new String[] { "61c0c5a71d1f82001bdaa+++", "61c0c5a71d1f82001bdaa___"};
-        UserOperations.createOrder(ingridients)
+        OrderOperations.createOrder(ingridients, accessToken)
                 .then().assertThat()
                 .statusCode(500);
     }

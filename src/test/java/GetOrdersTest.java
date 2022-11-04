@@ -24,7 +24,7 @@ public class GetOrdersTest {
     @Test
     @DisplayName("Get order list")
     public void getOrderList() {
-        UserOperations.getOrders(accessToken)
+        OrderOperations.getOrders(accessToken)
                 .then().assertThat()
                 .statusCode(200);
     }
@@ -32,7 +32,7 @@ public class GetOrdersTest {
     @Test
     @DisplayName("Get order list unauthorized user")
     public void getOrderListUnauth() {
-        UserOperations.getOrders()
+        OrderOperations.getOrders()
                 .then().assertThat()
                 .statusCode(401);
     }
